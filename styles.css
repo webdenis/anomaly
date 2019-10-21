@@ -1,0 +1,33 @@
+html, body, .main {
+	margin: 0;
+	padding: 0;
+	overflow: hidden;
+}
+
+.main .rect {
+	background-color: black;
+	height: 50%;
+	width: 50%;
+	position: absolute;
+	transition: all 1s ease-in-out;
+}
+
+.topleft {
+	top: 0;
+	left: 0;
+}
+
+.topright {
+	top: 0;
+	left: 50%;
+}
+
+.bottomleft {
+	top: 50%;
+	left: 0;
+}
+
+.bottomright {
+	top: 50%;
+	left: 50%;
+}
