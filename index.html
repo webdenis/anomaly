@@ -2,14 +2,20 @@
 <html>
 	<head>
 	
-		<title>Boxes</title>
+		<title>Escape</title>
 		<link rel="stylesheet" href="styles.css">
-		
+		<link rel="stylesheet" href="https://code.jquery.com/ui/1.12.0/themes/smoothness/jquery-ui.css">
 		<script
-			  src="https://code.jquery.com/jquery-3.4.1.slim.js"
-			  integrity="sha256-BTlTdQO9/fascB1drekrDVkaKd9PkwBymMlHOiG+qLI="
-			  crossorigin="anonymous"></script>
+			src="https://code.jquery.com/jquery-3.4.1.min.js"
+			integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo="
+			crossorigin="anonymous"></script>
+		<script
+			src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"
+			integrity="sha256-VazP97ZCwtekAsvgPBSUwPFKdrwD3unUfSGVYrahUqU="
+			crossorigin="anonymous"></script>
+		
 		<script src="main.js"></script>
+		
 		
 	</head>
 	
@@ -21,8 +27,31 @@
 			<div class="rect topright"></div>
 			<div class="rect bottomleft"></div>
 			<div class="rect bottomright"></div>-->
-			<div class="fullrect mid rotating"></div>
+			<div class="fullrect rotating"></div>
 			
+		</div>
+		
+		<div class="info">
+		
+			<p>Follow cursor (RMB): <span id="infoCursorPosition"></span></p>
+			
+			<p>Rotation lock (LMB): <span id="infoRotationLock"></span></p>
+		
+			<p>Rotation: <span id="infoRotation"></span></p>
+			
+			<p>Colors: <span id="infoColorMode"></span></p>
+			
+			<p>Interval: <span id="infoInterval"></span></p>
+			<div class="colOne">
+				<div id="intervalSlider" class="slider"></div>
+			</div>
+			<div class="colTwo">
+				<input id="intervalModeTick" type="checkbox" />
+			</div>
+			<div style="clear: both;"></div>
+			
+			<p>Auto-destruct: <span id="infoDestruct"></span></p>
+			<div id="destructSlider" class="slider twoCol"></div>
 		</div>
 	
 	</body>

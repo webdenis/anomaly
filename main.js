@@ -1,17 +1,64 @@
 $(function() {
 	
-	var interval = 1000;
+	// Interaction variables
+	var interval = 400;
 	var color = 0;
 	var rectAnimation = 'none';
+	var destructTimer = 1000;
+	
+	var currentMouseX = 50;
+	var currentMouseY = 50;
+	
+	var intervalMouseMode = true; 
+	
+	var lockCursor = false;
+	
+	var lockRotation = false;
+	
+	// Additional info variables
+	var infoRotation = 'none';
+	var infoColorMode = 'grays';
+	
+	function updateInfo() {
+		$("#infoCursorPosition").text(!lockCursor);
+		$("#infoRotationLock").text(lockRotation);
+		$("#infoRotation").text(infoRotation);
+		$("#infoColorMode").text(infoColorMode);
+		$("#infoInterval").text(interval.toFixed(0) + 'ms');
+		$("#infoDestruct").text(destructTimer + 'ms');
+	}
+	
+	updateInfo();
 	
 	/* 
 		1 - grayscale
 		2 - random non grayscale
 		3 - black to white to black
+		4 - pics
 	*/
 	var currentColorMode = 1;
 	
-	// Mousemove interactivity
+	// Mouse buttons interactivity
+	$('.main').mousedown(function(event) {
+		switch (event.which) {
+			case 1: // lmb
+				lockRotation = !lockRotation;
+				break;
+			case 2: // mmb
+				break;
+			case 3: // rmb
+				lockCursor = !lockCursor;
+				break;
+			default:
+				console.log('8-)');
+		}
+	});
+	
+	$('.main').on('contextmenu', function(event){
+        event.preventDefault();
+    });
+	
+	// Mouse move interactivity
 	$(document).mousemove(function(getCurrentPos){
 		var xCord = getCurrentPos.clientX;
 		var yCord = getCurrentPos.clientY;
@@ -19,21 +66,38 @@ $(function() {
 		var xPercent = Math.floor(xCord / $(window).width() * 100);
 		var yPercent = Math.floor(yCord / $(window).height() * 100);
 		
-		// Bottom to top = box generation interval
-		interval = yPercent * 5 - 300;
-		
-		// Left to right = left or right rotation speed
-		let speed;
-		if (xPercent < 49) {
-			speed = 0.05 + (xPercent / 5);
-			rectAnimation = 'rotatingLeft '+speed.toFixed(1)+'s linear infinite';
-		} else if (xPercent > 51) {
-			speed = 5.05 - (xPercent - 50) / 10;
-			rectAnimation = 'rotatingRight '+speed.toFixed(1)+'s linear infinite';
-		} else {
-			rectAnimation = 'none';
+		if (!lockCursor) {
+			currentMouseX = xPercent;
+			currentMouseY = yPercent;
 		}
 		
+		// Bottom to top = box generation interval
+		if (intervalMouseMode) {
+			interval = 0.04*(Math.pow(yPercent,2));
+			$("#intervalSlider").slider('value', yPercent);
+		}
+		//interval = Math.floor(Math.pow(yPercent, 1.2));
+		//interval = 0.04*(Math.pow(yPercent,2));
+		
+		// Left to right = left or right rotation speed
+		if (!lockRotation) {
+			let speed;
+			if (xPercent < 49) {
+				speed = 0.1 + 0.00023 * Math.pow(xPercent, 3.32);
+				rectAnimation = 'rotatingLeft '+speed.toFixed(1)+'s linear infinite';
+				infoRotation = 'left ' + speed.toFixed(1) + 's';
+
+			} else if (xPercent > 51) {
+				speed = -1.25 + 101.25 / Math.pow(2, ((xPercent - 50) / 7.886));
+				rectAnimation = 'rotatingRight '+speed.toFixed(1)+'s linear infinite';
+				infoRotation = 'right ' + speed.toFixed(1) + 's';
+			} else {
+				rectAnimation = 'none';
+				infoRotation = 'none';
+			}
+		}
+		
+		updateInfo();
 		
 	});
 	
@@ -43,19 +107,25 @@ $(function() {
 		switch(currentColorMode) {
 			case 1:
 				x = getGrayscale();
+				infoColorMode = 'grays';
 				break;
 			case 2:
 				x = getRandomColor();
+				infoColorMode = 'random colors';
 				break;
 			case 3:
 				x = getGrayscalePeriodic();
+				infoColorMode = 'grays periodic';
 				break;
 			case 4:
 				x = getRandomBackground();
+				infoColorMode = 'pictures';
 				break;
 			default:
 				x = getGrayscale();
+				infoColorMode = 'grays';
 		}
+		updateInfo();
 		return x;
 	}
 	
@@ -149,15 +219,16 @@ $(function() {
 	$.fn.letsGo = function(x, y) {
 	  
 		let rect = $(this[0]);
-		//rect.unbind('mouseover');
 
 		let prepy = rect.offset().top + y * rect.height();
 		let prepx = rect.offset().left + x * rect.width();
+		
+		let calc = 0;
 
-		rect.css('left', '-25%');
-		rect.css('top', '-25%');
-		rect.css('width', '150%');
-		rect.css('height', '150%');
+		rect.css({'left': '-=25%'});
+		rect.css({'top': '-=25%'});
+		rect.css({'width': '+=150%'});
+		rect.css({'height': '+=150%'});
 		
 		let cns = this[0].className;
 		
@@ -169,30 +240,18 @@ $(function() {
 			'background' : randomColor,
 		})
 		.css('-webkit-animation', rectAnimation)
-		/*.mouseover(function() {
-			$(this).calcAndGo();
-		})*/
+		.css({left: currentMouseX+'%', top: currentMouseY+'%'})
 		.appendTo('.main');
 		
 		rect.addClass('setForRemoval');
 		setTimeout(function() {
 			rect.remove();
-		}, 1000);
+		}, destructTimer);
 
 		return this;
 	}; 
 	
-	// Setup and go
-	/*setInterval(function() {
-		$(".rect").each(function() {
-			if ($(this).hasClass('setForRemoval')) {
-				console.log('nigga its set for removal');
-			} else {
-				$(this).calcAndGo();
-			}
-			
-		});
-	}, 50);*/
+
 	
 	function go() {
 		setTimeout(function() {
@@ -206,5 +265,33 @@ $(function() {
 	}
 	
 	go();
+	
+	// Interval slider init
+	$( "#intervalSlider" ).slider({
+		range: "min",
+		value: interval,
+		min: 1,
+		max: 100,
+		slide: function( event, ui ) {
+			interval = 0.04*(Math.pow(ui.value,2));
+			updateInfo();
+		}
+    });
+	
+	$("#intervalModeTick").change(function() {
+		intervalMouseMode = !this.checked;
+	});
+	
+	// Self destruct timer slider init
+	$( "#destructSlider" ).slider({
+		range: "min",
+		value: destructTimer,
+		min: 100,
+		max: 3000,
+		slide: function( event, ui ) {
+			destructTimer = ui.value;
+			updateInfo();
+		}
+    });
 	
 });
