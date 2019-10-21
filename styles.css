@@ -6,56 +6,12 @@ html, body, .main {
 	height: 100%;
 }
 
-.main .rect {
-	background-color: black;
-	height: 50%;
-	width: 50%;
-	position: absolute;
-	transition: all 1s ease-in-out;
-}
-
 .main .fullrect {
 	width: 0%;
 	height: 0%;
 	background-color: black;
 	position: absolute;
-	transition: all 1s ease-in-out;
-}
-
-.main .fullrectx {
-	width: 7%;
-	height: 7%;
-	background-color: black;
-	position: absolute;
-	z-index: 10;
-	filter: blur(5px);
-	top: 47%;
-	left: 47%;
-}
-
-.topleft {
-	top: 0;
-	left: 0;
-}
-
-.topright {
-	top: 0;
-	left: 50%;
-}
-
-.bottomleft {
-	top: 50%;
-	left: 0;
-}
-
-.bottomright {
-	top: 50%;
-	left: 50%;
-}
-
-.mid {
-	top: 49.5%;
-	left: 49.5%;
+	/*transition: all 1s ease-in-out;*/
 }
 
 @-webkit-keyframes rotatingRight {
@@ -78,11 +34,11 @@ html, body, .main {
 
 .info {
 	font-family: Helvetica;
-	padding: 1%;
+	padding: 5px 10px;
 	width: 111px;
 	font-size: 7pt;
-	color: black;
-	background-color: rgba(255,255,255,0.65);
+	color: white;
+	background-color: rgba(0,0,0,0.65);
 	border-radius: 5px;
 	border: 1px solid #ccc;
 	position: absolute;
@@ -95,12 +51,19 @@ html, body, .main {
 	margin: 0;
 }
 
-.slider {
-	opacity: 0.75;
+.info > div {
+	margin: 0px -10px 0px -10px;
+	padding: 5px 10px 5px 10px;
+	overflow: auto;
 }
 
-#intervalSlider {
-	
+.info > div.selected {
+	background-color: rgba(200,200,200, 0.75);
+	color: black;
+}
+
+.slider {
+	opacity: 0.75;
 }
 
 .twoCol {
