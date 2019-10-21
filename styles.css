@@ -12,6 +12,25 @@ html, body, .main {
 	transition: all 1s ease-in-out;
 }
 
+.main .fullrect {
+	width: 5%;
+	height: 5%;
+	background-color: black;
+	position: absolute;
+	transition: all 1s ease-in-out;
+}
+
+.main .fullrectx {
+	width: 7%;
+	height: 7%;
+	background-color: black;
+	position: absolute;
+	z-index: 10;
+	filter: blur(5px);
+	top: 47%;
+	left: 47%;
+}
+
 .topleft {
 	top: 0;
 	left: 0;
@@ -30,4 +49,35 @@ html, body, .main {
 .bottomright {
 	top: 50%;
 	left: 50%;
+}
+
+.mid {
+	top: 48%;
+	left: 48%;
+}
+
+@-webkit-keyframes rotatingRight {
+    from{
+        -webkit-transform: rotate(0deg);
+    }
+    to{
+        -webkit-transform: rotate(360deg);
+    }
+}
+
+.rotatingRight {
+    -webkit-animation: rotatingRight 2s linear infinite;
+}
+
+@-webkit-keyframes rotatingLeft {
+    from{
+        -webkit-transform: rotate(360deg);
+    }
+    to{
+        -webkit-transform: rotate(0deg);
+    }
+}
+
+.rotatingLeft {
+    -webkit-animation: rotatingLeft 2s linear infinite;
 }
