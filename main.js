@@ -12,8 +12,8 @@ $(function() {
 		var yPercent = Math.floor(yCord / $(window).height() * 100);
 		
 		//console.log(xPercent, yPercent);
-		interval = xPercent * 2;
-		color = Math.floor(yPercent * 2.55);
+		interval = xPercent * 5;
+		color = (Math.random() < 0.5 ? -1 : 1) * yPercent * 2.55;
 		
 		
 	});
@@ -27,21 +27,10 @@ $(function() {
 		var grayscale = (value << 16) | (value << 8) | value;
 		var color = '#' + grayscale.toString(16);
 		return color;*/
-		/*if (up) {
-			counter++;
-		} else {
-			counter--;
-		}
 		
-		if (counter === 150) {
-			up = false;
-		}
-		
-		if (counter === 0) {
-			up = true;
-		}
-		*/
-		return 'rgb('+color+','+color+','+color+')';
+		return ("url('pic"+(Math.random() < 0.5 ? 1 : 2)+".jpg') "+color+"% "+color+"%");
+
+		//return 'rgb('+color+','+color+','+color+')';
 	}
 	/*var counter = 0;
 	var up = true;*/
@@ -92,7 +81,7 @@ $(function() {
 			"class": cns
 		})
 		.css({
-			'background-color' : randomColor,
+			'background' : randomColor,
 		})
 		/*.mouseover(function() {
 			$(this).calcAndGo();
