@@ -8,6 +8,9 @@ $(function() {
 	
 	/**	Default interaction variables **/
 	var menu 				= true;		//	Show interaction & information menu
+	
+	var fullStop			= false;	//	Stop objects from generating
+	
 	var interval 			= 500; 		// 	Time between object generation
 	
 	var color 				= 0;		// 	Starting color
@@ -30,7 +33,8 @@ $(function() {
 	var currentMouseX 		= 50;		// 	Current Mouse X position in percentages
 	var currentMouseY 		= 50;		//				  Y
 	
-	var intervalMouseMode 	= false;  	// 	Locks mouse affecting interval in Y scale
+	var intervalMouseMode 	= true;  	// 	Mouse affecting interval in Y scale
+	var rotationMouseMode	= true;		//	Mouse affecting rotation in X scale
 	
 	var lockCursor 			= true;		// 	Generated objects appear at cursor position
 	var lockRotation 		= false;	// 	Current object rotation is locked to mouse changes
@@ -51,17 +55,22 @@ $(function() {
 	if (!menu) {
 		$(".info").css('display', 'none');
 	}
-	
+		
 	var infoRotation = 'none';
 	var infoColorMode = 'grays';
 	
 	function updateInfo() {
+		
+		$("#infoShowMenu").text(menu ? "ON" : "OFF");
+		$("#infoStop").text(fullStop ? "ON" : "OFF");
+		
 		$("#infoCursorPosition").text(!lockCursor ? "ON" : "OFF");
 		$("#infoRotationLock").text(lockRotation ? "ON" : "OFF");
 		$("#infoRotation").text(infoRotation);
 		$("#infoColorMode").text(infoColorMode);
 		$("#infoIntervalLock").text(lockInterval ? "ON" : "OFF");
 		$("#infoInterval").text(interval.toFixed(0) + 'ms');
+		$("#infoAnimationSpeed").text(animationTimer);
 		$("#infoDestruct").text(destructTimer + 'ms');
 		
 		$("#infoRandomRotation").text(randomRotation ? "ON" : "OFF");
@@ -69,6 +78,7 @@ $(function() {
 		$("#infoRandomLocation").text(randomLocation ? "ON" : "OFF");
 		$("#infoRandomColors").text(randomColors ? "ON" : "OFF");
 		$("#infoRandomEvery").text(randomEvery);
+
 	}
 	
 	updateInfo();
@@ -89,6 +99,7 @@ $(function() {
 	// Arrow keys interactions
 	
 	// Up and down - change interaction mode variable, remove and add visual selection in menu
+	// Left and right - change value
 	$(document).keydown(function(e) {
 		switch(e.which) {
 			
@@ -103,9 +114,7 @@ $(function() {
 				$(".info>div").removeClass('selected');
 				$(".info>div:eq("+(interactionMode - 1)+")").addClass('selected');
 				break;
-				
-	// Left and right - change value
-				
+
 			case 37: // left - change boolean value
 				interactionValue('left');
 				break;
@@ -114,9 +123,16 @@ $(function() {
 				interactionValue('right');
 				break;
 				
+			case 36: // HOME - menu ON
+				menu = true;
+				$(".info").css('display', menu ? 'block' : 'none');
+				break;
+				
 			default: return;
 		}
 		e.preventDefault();
+		e.stopPropagation();
+		return false;
 	});
 	
 	// Change interaction value
@@ -124,6 +140,20 @@ $(function() {
 		let mode = $(".info>div:eq("+(interactionMode - 1)+")").attr('data');
 		
 		switch(mode) {
+			case 'intMenu':
+				menu = !menu;
+				
+				$(".info").css('display', menu ? 'block' : 'none');
+				break;
+			
+			case 'intStop':
+				fullStop = !fullStop;
+				
+				if (!fullStop) {
+					mainLoop();
+				}
+				break;
+			
 			case 'intFollowCursor':
 				lockCursor = !lockCursor;
 				break;
@@ -172,6 +202,8 @@ $(function() {
 			
 			default: return;
 		}
+		
+		updateInfo();
 	}
 	
 	// End of interaction menu and information functionality
@@ -232,31 +264,51 @@ $(function() {
 		intervalInteractivity(val);		
 	}
 	
+	/** Interval and Rotation formulas and interaction functions **/
+	
+	// Interval formula function
+	function intervalFormula(val) {
+		return 0.05*(Math.pow(val,2));
+	}
+	
 	// Interval interactivity function
 	function intervalInteractivity(val) {
 		if (intervalMouseMode && !lockInterval) {
-			interval = 0.05*(Math.pow(val,2));
+			interval = intervalFormula(val);
 			$("#intervalSlider").slider('value', val);
 		}
 	}
 	
+	// Rotation formula function
+	function rotationFormula(val) {
+		let speed;
+		if (val < 49) {
+			speed = 0.1 + 0.00023 * Math.pow(val, 3.32);
+		}
+		if (val > 51) {
+			speed = -1.25 + 101.25 / Math.pow(2, ((val - 50) / 7.886));
+		}
+		return speed;
+	}
+	
 	// Rotation interactivity function
 	function rotationInteractivity(val) {
-		if (!lockRotation) {
+		if (rotationMouseMode && !lockRotation) {
 			let speed;
 			if (val < 49) {
-				speed = 0.1 + 0.00023 * Math.pow(val, 3.32);
+				speed = rotationFormula(val);
 				rectAnimation = 'rotatingLeft '+speed.toFixed(1)+'s linear infinite';
 				infoRotation = 'left ' + speed.toFixed(1) + 's';
 
 			} else if (val > 51) {
-				speed = -1.25 + 101.25 / Math.pow(2, ((val - 50) / 7.886));
+				speed = rotationFormula(val);
 				rectAnimation = 'rotatingRight '+speed.toFixed(1)+'s linear infinite';
 				infoRotation = 'right ' + speed.toFixed(1) + 's';
 			} else {
 				rectAnimation = 'none';
 				infoRotation = 'none';
 			}
+			$("#rotationSlider").slider('value', val);
 		}
 	}
 	
@@ -371,6 +423,14 @@ $(function() {
 	
 	/** Initiate menu sliders and functionality **/
 	
+	$.prototype.slider_old = $.prototype.slider;
+	$.prototype.slider = function()
+	{
+		var result = $.prototype.slider_old.apply(this, arguments);
+		this.find(".ui-slider-handle").unbind("keydown"); // disable keyboard actions
+		return result;
+	}
+	
 	// Interval slider
 	$( "#intervalSlider" ).slider({
 		range: "min",
@@ -378,7 +438,7 @@ $(function() {
 		min: 1,
 		max: 100,
 		slide: function( event, ui ) {
-			interval = 0.05*(Math.pow(ui.value,2));
+			interval = intervalFormula(ui.value);
 			updateInfo();
 		}
     });
@@ -387,6 +447,24 @@ $(function() {
 	
 	$("#intervalModeTick").change(function() {
 		intervalMouseMode = !this.checked;
+	});
+	
+	// Rotation slider
+	$( "#rotationSlider" ).slider({
+		range: "min",
+		value: interval,
+		min: 1,
+		max: 100,
+		slide: function( event, ui ) {
+			interval = rotationFormula(ui.value);
+			updateInfo();
+		}
+    });
+	
+	$("#rotationModeTick").removeAttr('checked');
+	
+	$("#rotationModeTick").change(function() {
+		rotationMouseMode = !this.checked;
 	});
 	
 	// Animation speed slider
@@ -461,6 +539,7 @@ $(function() {
 	
 	// Main loop for object generation
 	function mainLoop() {
+				
 		setTimeout(function() {
 			randomizeInteractions();  // randomize object settings
 			
@@ -469,7 +548,10 @@ $(function() {
 					$(this).objectJob();
 				}
 			});
-			mainLoop(); // loop the function
+			if (!fullStop) {	// if generation not stopped
+				mainLoop(); 	// loop the function
+			}
+
 		}, interval);	// loop interval in ms
 	}
 	

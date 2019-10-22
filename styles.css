@@ -34,7 +34,7 @@ html, body, .main {
 
 .info {
 	font-family: Helvetica;
-	padding: 5px 10px;
+	padding: 7px 7px;
 	width: 111px;
 	font-size: 7pt;
 	color: white;
@@ -52,8 +52,8 @@ html, body, .main {
 }
 
 .info > div {
-	margin: 0px -10px 0px -10px;
-	padding: 5px 10px 5px 10px;
+	margin: 0px -7px 0px -7px;
+	padding: 1px 7px 1px 7px;
 	overflow: auto;
 }
 
@@ -69,13 +69,15 @@ html, body, .main {
 .twoCol {
 	margin-left: 1px;
 	margin-right: 2px;
+	margin-top: 4px;
+	margin-bottom: 2px;
 }
 
 .colOne {
 	margin-left: 1px;
 	margin-top: 4px;
 	width: 80%; float: left;
-	margin-bottom: 8px;
+	margin-bottom: 4px;
 }
 
 .colTwo {
