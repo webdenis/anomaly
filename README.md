@@ -1,7 +1,7 @@
 # Anomaly
 Anomaly is a web-app for visual object generation and interaction.
 
-Used stack: HTML, CSS3, Javascript & JQuery (+UI)
+Used stack: HTML, CSS3, Javascript - JQuery (+UI) - js-cookie
 
 Demo: https://webdenis.github.io/anomaly/
 
@@ -27,6 +27,9 @@ Randomization:
 
 Presets:
 - Presets are stored in cookies. Default (demo) presets are loaded if **loadDemoPresets** is set to **true**. Variable **demoPresetJSON** needs to be populated with JSON formatted array of preset objects.
+```
+	var demoPresetJSON = '[{"menu":true,"fullStop":false,"currentColorMode":3,"lockCursor":true,"interval":0.2,"intervalMouseMode":false,"rotationMouseMode":false,"rotationValue":65,"animationTimer":7.5,"destructTimer":3000,"currentMouseX":50,"currentMouseY":50,"randomRotation":true,"randomInterval":false,"randomLocation":false,"randomColors":false,"randomEvery":1}]';
+```
 - Current group of settings can be saved using **Add new preset**.
 - Selected preset can be removed using **Remove selected preset**.
 
