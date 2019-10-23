@@ -2,12 +2,14 @@ $(function() {
 	
 	/**
 		@name Anomaly
-		@version 0.6
+		@version 0.7
 		@github https://github.com/webdenis/anomaly
 	**/
 	
 	/**	Default interaction variables **/
 	var menu 				= true;		//	Show interaction & information menu
+	
+	var loadDemoPresets		= true;		//	Will load a demo preset if menu starts with 0 presets
 	
 	var fullStop			= false;	//	Stop objects from generating
 	
@@ -24,7 +26,7 @@ $(function() {
 	var firstColor 			= 1; 		//	Number of first
 	var lastColor 			= 4;		//	and last color	
 	
-	var rectAnimation 		= 'none';	// 	Generated CSS string for object rotation
+	var rotation 			= 'none';	// 	Generated CSS string for object rotation
 	
 	var animationTimer		= 1;		// 	Animation time in seconds
 	
@@ -36,10 +38,7 @@ $(function() {
 	var intervalMouseMode 	= true;  	// 	Mouse affecting interval in Y scale
 	var rotationMouseMode	= true;		//	Mouse affecting rotation in X scale
 	
-	var lockCursor 			= true;		// 	Generated objects appear at cursor position
-	var lockRotation 		= false;	// 	Current object rotation is locked to mouse changes
-	var lockInterval 		= false;	// 	Current interval is locked
-	
+	var lockCursor 			= true;		// 	Generated objects appear at cursor position	
 										// 	Newly generated objects:
 	var randomRotation 		= false;	// 	- Are randomly rotated
 	var randomInterval 		= false;	//	- Appear within random intervals
@@ -58,31 +57,52 @@ $(function() {
 		
 	var infoRotation = 'none';
 	var infoColorMode = 'grays';
-	
+	var intervalValue = 0;
+	var rotationValue = 0;
+		
 	function updateInfo() {
-		
-		$("#infoShowMenu").text(menu ? "ON" : "OFF");
-		$("#infoStop").text(fullStop ? "ON" : "OFF");
-		
-		$("#infoCursorPosition").text(!lockCursor ? "ON" : "OFF");
-		$("#infoRotationLock").text(lockRotation ? "ON" : "OFF");
-		$("#infoRotation").text(infoRotation);
-		$("#infoColorMode").text(infoColorMode);
-		$("#infoIntervalLock").text(lockInterval ? "ON" : "OFF");
-		$("#infoInterval").text(interval.toFixed(0) + 'ms');
-		$("#infoAnimationSpeed").text(animationTimer);
-		$("#infoDestruct").text(destructTimer + 'ms');
-		
-		$("#infoRandomRotation").text(randomRotation ? "ON" : "OFF");
-		$("#infoRandomInterval").text(randomInterval ? "ON" : "OFF");
-		$("#infoRandomLocation").text(randomLocation ? "ON" : "OFF");
-		$("#infoRandomColors").text(randomColors ? "ON" : "OFF");
-		$("#infoRandomEvery").text(randomEvery);
-
+		if (menu) { // only update if menu is visible
+			$("#infoShowMenu").text(menu ? "ON" : "OFF");
+			$("#infoStop").text(fullStop ? "ON" : "OFF");
+			$("#infoColorMode").text(infoColorMode);
+			
+			$("#infoCursorPosition").text(!lockCursor ? "ON" : "OFF");
+			$("#infoPosition").text('X '+currentMouseX+'%, Y '+currentMouseY+'%');
+			
+			$("#infoIntervalMouseMode").text(intervalMouseMode ? "ON" : "OFF");
+			$("#infoInterval").text(interval.toFixed(0) + 'ms');
+			
+			if ($("#intervalSlider").hasClass('ui-slider')) {
+				$("#intervalSlider").slider('value', intervalValue);
+			}
+			
+			$("#infoRotationMouseMode").text(rotationMouseMode ? "ON" : "OFF");
+			$("#infoRotation").text(infoRotation);
+			
+			if ($("#rotationSlider").hasClass('ui-slider')) {
+				$("#rotationSlider").slider('value', rotationValue);
+			}
+			
+			$("#infoAnimationSpeed").text(animationTimer);
+			
+			if ($("#animationSlider").hasClass('ui-slider')) {
+				$("#animationSlider").slider('value', animationTimer);
+			}
+			
+			$("#infoDestruct").text(destructTimer + 'ms');
+			
+			if ($("#destructSlider").hasClass('ui-slider')) {
+				$("#destructSlider").slider('value', destructTimer);
+			}
+			
+			$("#infoRandomRotation").text(randomRotation ? "ON" : "OFF");
+			$("#infoRandomInterval").text(randomInterval ? "ON" : "OFF");
+			$("#infoRandomLocation").text(randomLocation ? "ON" : "OFF");
+			$("#infoRandomColors").text(randomColors ? "ON" : "OFF");
+			$("#infoRandomEvery").text(randomEvery);
+		}
 	}
-	
-	updateInfo();
-	
+
 	/* 	
 		Arrow keys functionality for menu interaction
 		 - Up and Down cycles through the interactions in the menu
@@ -158,8 +178,8 @@ $(function() {
 				lockCursor = !lockCursor;
 				break;
 				
-			case 'intRotationLock':
-				lockRotation = !lockRotation;
+			case 'intRotationMouseMode':
+				rotationMouseMode = !rotationMouseMode;
 				break;
 				
 			case 'intRotationSpeed':
@@ -173,9 +193,10 @@ $(function() {
 					currentColorMode++;
 					if (currentColorMode === (lastColor + 1)) { currentColorMode = firstColor; }
 				}
+				break;
 				
-			case 'intIntervalLock':
-				lockInterval = !lockInterval;
+			case 'intIntervalMouseMode':
+				intervalMouseMode = !intervalMouseMode;
 				break;
 				
 			case 'intInterval':
@@ -203,10 +224,149 @@ $(function() {
 			default: return;
 		}
 		
-		updateInfo();
 	}
 	
 	// End of interaction menu and information functionality
+	
+	/** Presets functionality **/
+		
+	// Initialize variables
+	var demoPresetJSON = '[{"menu":true,"fullStop":false,"currentColorMode":3,"lockCursor":true,"interval":0.2,"intervalMouseMode":false,"rotationMouseMode":false,"rotationValue":65,"animationTimer":7.5,"destructTimer":3000,"currentMouseX":50,"currentMouseY":50,"randomRotation":true,"randomInterval":false,"randomLocation":false,"randomColors":false,"randomEvery":1}]';
+	
+	var savedPresets = []; // array of saved presets
+	var selectedPresetNumber = 0; // store current preset number (not array positions!)
+	
+	// Initialize cookies, empty or saved
+	if (Cookies.get('savedPresets')) {
+		let parsed = JSON.parse(Cookies.get('savedPresets'));
+		savedPresets = 
+			(parsed.length === 0) ? JSON.parse(demoPresetJSON) : parsed;
+		updatePresetBoxes();
+	}
+	
+	// Save cookies
+	function savePresetCookies() {
+		Cookies.set('savedPresets', JSON.stringify(savedPresets));
+	}
+	
+	// Appends preset array with a new preset
+	function addPreset(preset) {
+		savedPresets.push(preset);
+		savePresetCookies();
+	}
+	
+	// Removes preset from array at given position
+	function removePreset(id) {
+		savedPresets.splice(id - 1, 1);
+		savePresetCookies();
+	}
+	
+	// Generate preset from current values
+	function generatePreset() {
+		return {
+			'menu' : menu,
+			'fullStop' : fullStop,
+			'currentColorMode' : currentColorMode,
+			'lockCursor' : lockCursor,
+			
+			'interval' : interval,
+			'intervalMouseMode' : intervalMouseMode,
+
+			'rotationMouseMode' : rotationMouseMode,
+			'rotationValue' : rotationValue,
+			
+			'animationTimer' : animationTimer,
+			'destructTimer' : destructTimer,
+			
+			'currentMouseX' : currentMouseX,
+			'currentMouseY' : currentMouseY,
+			
+			'randomRotation' : randomRotation,
+			'randomInterval' : randomInterval,
+			'randomLocation' : randomLocation,
+			'randomColors' : randomColors,
+			'randomEvery' : randomEvery
+		};
+	}
+	
+	// Apply preset array to values
+	function applyPreset(preset) {
+		menu = preset['menu'];
+		fullStop = preset['fullStop'];
+		currentColorMode = preset['currentColorMode'];
+		lockCursor = preset['lockCursor'];
+		 
+		intervalMouseMode = preset['intervalMouseMode'];
+		intervalInteractivity(preset['interval']); // sets interval & intervalValue
+		 
+		rotationMouseMode = preset['rotationMouseMode'];
+		rotationInteractivity(preset['rotationValue']); // sets rotation & rotationValue
+			 
+		animationTimer = preset['animationTimer'];
+		destructTimer = preset['destructTimer'];
+		
+		currentMouseX = preset['currentMouseX'];
+		currentMouseY = preset['currentMouseY'];
+			   
+		randomRotation = preset['randomRotation'];
+		randomInterval = preset['randomInterval'];
+		randomLocation = preset['randomLocation'];
+		randomColors = preset['randomColors'];
+		randomEvery = preset['randomEvery'];
+	}
+		
+	// Preset click event & call apply
+	$('#presetBoxes').on('click', '.preset', function() {
+		selectedPresetNumber = $(this).text();
+		$('.removePreset').removeClass('disabled');
+		$("#presetBoxes>span").removeClass('selected');
+		$("#presetBoxes>span:eq("+(selectedPresetNumber - 1)+")").addClass('selected');
+		
+		applyPreset(savedPresets[selectedPresetNumber - 1]);
+	});
+	
+	// Add preset button
+	$('.addPreset').click(function() {
+		addPreset(generatePreset());
+		selectedPresetNumber = savedPresets.length;
+		updatePresetBoxes();
+		return false;
+	});
+	
+	// Remove currently selected preset button
+	$('.removePreset').click(function() {
+		if (selectedPresetNumber === 0) {
+			return;
+		}
+		removePreset(selectedPresetNumber);
+		selectedPresetNumber = 0;
+		updatePresetBoxes();
+		return false;
+	});
+	
+	// Update presets container
+	function updatePresetBoxes() {
+		let boxContainer = $('#presetBoxes');
+		boxContainer.empty(); // clear
+		
+		// Generate text or boxes
+		if (savedPresets.length === 0) {
+			boxContainer.text('no saved presets');
+		} else {
+			$.each(savedPresets, function(i, obj) {
+				boxContainer.append('<span class="preset '+(selectedPresetNumber === (i+1) ? 'selected' : '')+'">'+(i+1)+'</span>');
+			});
+		}
+		
+		// Visually disable remove preset button
+		if (selectedPresetNumber === 0) {
+			$('.removePreset').addClass('disabled');
+		} else {
+			$('.removePreset').removeClass('disabled');
+		}
+	}
+	
+	// End of presets functionality
 	
 	/** Mouse interactions **/
 	
@@ -230,10 +390,10 @@ $(function() {
     });
 	
 	// Mouse move interactivity
-	$(document).mousemove(function(getCurrentPos){
+	$(document).mousemove(function(e){
 		// Get coordinates
-		var xCord = getCurrentPos.clientX;
-		var yCord = getCurrentPos.clientY;
+		var xCord = e.clientX;
+		var yCord = e.clientY;
 
 		// Calculate position in percentages
 		var xPercent = Math.floor(xCord / $(window).width() * 100);
@@ -248,20 +408,19 @@ $(function() {
 		// Call X and Y axis interaction functions
 		xMousemove(xPercent);
 		yMousemove(yPercent);
-				
-		updateInfo();
-		
 	});
 	
 	/** Todo: functionality to bind functions to X-Y axis functions instead of hardcoding them here **/
 	// Mouse move function left-right
 	function xMousemove(val) {
-		rotationInteractivity(val);
+		if (rotationMouseMode)
+			rotationInteractivity(val);
 	}
 	
 	// Mouse move function up-down
 	function yMousemove(val) {
-		intervalInteractivity(val);		
+		if (intervalMouseMode)
+			intervalInteractivity(val);		
 	}
 	
 	/** Interval and Rotation formulas and interaction functions **/
@@ -273,10 +432,8 @@ $(function() {
 	
 	// Interval interactivity function
 	function intervalInteractivity(val) {
-		if (intervalMouseMode && !lockInterval) {
-			interval = intervalFormula(val);
-			$("#intervalSlider").slider('value', val);
-		}
+		intervalValue = val;
+		interval = intervalFormula(val);
 	}
 	
 	// Rotation formula function
@@ -286,29 +443,27 @@ $(function() {
 			speed = 0.1 + 0.00023 * Math.pow(val, 3.32);
 		}
 		if (val > 51) {
-			speed = -1.25 + 101.25 / Math.pow(2, ((val - 50) / 7.886));
+			speed = -1.15 + 101.25 / Math.pow(2, ((val - 50) / 7.886));
 		}
 		return speed;
 	}
 	
 	// Rotation interactivity function
 	function rotationInteractivity(val) {
-		if (rotationMouseMode && !lockRotation) {
-			let speed;
-			if (val < 49) {
-				speed = rotationFormula(val);
-				rectAnimation = 'rotatingLeft '+speed.toFixed(1)+'s linear infinite';
-				infoRotation = 'left ' + speed.toFixed(1) + 's';
+		rotationValue = val;
+		let speed;
+		if (val < 49) {
+			speed = rotationFormula(val);
+			rotation = 'rotatingLeft '+speed.toFixed(1)+'s linear infinite';
+			infoRotation = 'left ' + speed.toFixed(1) + 's';
 
-			} else if (val > 51) {
-				speed = rotationFormula(val);
-				rectAnimation = 'rotatingRight '+speed.toFixed(1)+'s linear infinite';
-				infoRotation = 'right ' + speed.toFixed(1) + 's';
-			} else {
-				rectAnimation = 'none';
-				infoRotation = 'none';
-			}
-			$("#rotationSlider").slider('value', val);
+		} else if (val > 51) {
+			speed = rotationFormula(val);
+			rotation = 'rotatingRight '+speed.toFixed(1)+'s linear infinite';
+			infoRotation = 'right ' + speed.toFixed(1) + 's';
+		} else {
+			rotation = 'none';
+			infoRotation = 'none';
 		}
 	}
 	
@@ -359,7 +514,7 @@ $(function() {
 				break;
 			case 2:
 				x = getRandomColor();
-				infoColorMode = 'random colors';
+				infoColorMode = 'random non-gray';
 				break;
 			case 3:
 				x = getGrayscalePeriodic();
@@ -373,7 +528,6 @@ $(function() {
 				x = getGrayscale();
 				infoColorMode = 'grays';
 		}
-		updateInfo();
 		return x;
 	}
 	
@@ -438,44 +592,31 @@ $(function() {
 		min: 1,
 		max: 100,
 		slide: function( event, ui ) {
-			interval = intervalFormula(ui.value);
-			updateInfo();
+			intervalInteractivity(ui.value);
 		}
     });
-	
-	$("#intervalModeTick").removeAttr('checked');
-	
-	$("#intervalModeTick").change(function() {
-		intervalMouseMode = !this.checked;
-	});
-	
+
 	// Rotation slider
 	$( "#rotationSlider" ).slider({
 		range: "min",
-		value: interval,
+		value: rotation,
 		min: 1,
 		max: 100,
+		step: 0.1,
 		slide: function( event, ui ) {
-			interval = rotationFormula(ui.value);
-			updateInfo();
+			rotationInteractivity(ui.value);
 		}
     });
-	
-	$("#rotationModeTick").removeAttr('checked');
-	
-	$("#rotationModeTick").change(function() {
-		rotationMouseMode = !this.checked;
-	});
 	
 	// Animation speed slider
 	$( "#animationSlider" ).slider({
 		range: "min",
-		value: destructTimer,
+		value: animationTimer,
 		min: 0.5,
-		max: 5,
+		max: 7.5,
+		step: 0.5,
 		slide: function( event, ui ) {
 			animationTimer = ui.value;
-			updateInfo();
 		}
     });
 	
@@ -487,7 +628,6 @@ $(function() {
 		max: 3000,
 		slide: function( event, ui ) {
 			destructTimer = ui.value;
-			updateInfo();
 		}
     });
 	
@@ -499,7 +639,6 @@ $(function() {
 		max: 50,
 		slide: function( event, ui ) {
 			randomEvery = ui.value;
-			updateInfo();
 		}
     });
 	
@@ -524,7 +663,7 @@ $(function() {
 		// Create a new object
 		$('<div />', {"class": cns})									// clone classes				
 			.css({'background' : objColor})								// color
-			.css('-webkit-animation', rectAnimation)					// rotation
+			.css('-webkit-animation', rotation)							// rotation
 			.css({left: currentMouseX+'%', top: currentMouseY+'%'})		// position
 			.css('transition', 'all '+animationTimer+'s ease-in-out')	// animation speed
 			.appendTo('.main');										
@@ -557,6 +696,10 @@ $(function() {
 	
 	// START
 	mainLoop();
+	
+	setInterval(function() {
+		updateInfo();
+	}, 100);
 	
 	/** Main logic end **/
 	

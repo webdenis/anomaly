@@ -62,6 +62,36 @@ html, body, .main {
 	color: black;
 }
 
+.info a {
+	color: white;
+}
+
+.info hr {
+	margin: 2px;
+}
+
+#presetBoxes span {
+	display: inline-block;
+	background-color: rgba(255,255,255, 0.45);
+	width: auto;
+	height: 8px;
+	margin: 1px;
+	padding: 2px 3px;
+	color: black;
+	font-weight: bold;
+	text-align: center;
+	cursor: pointer;
+	border-radius: 2px;
+}
+
+#presetBoxes span:hover, #presetBoxes span.selected {
+	background-color: rgba(255,255,255, 0.75);
+}
+
+.removePreset.disabled {
+	color: #aaa;
+}
+
 .slider {
 	opacity: 0.75;
 }
