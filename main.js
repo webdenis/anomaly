@@ -35,10 +35,10 @@ $(function() {
 	var currentMouseX 		= 50;		// 	Current Mouse X position in percentages
 	var currentMouseY 		= 50;		//				  Y
 	
-	var intervalMouseMode 	= true;  	// 	Mouse affecting interval in Y scale
-	var rotationMouseMode	= true;		//	Mouse affecting rotation in X scale
+	var intervalMouseMode 	= true;  	// 	Mouse affecting interval in Y scale 			->(RMB)<-
+	var rotationMouseMode	= true;		//	Mouse affecting rotation in X scale				->(MMB)<-
 	
-	var lockCursor 			= true;		// 	Generated objects appear at cursor position	
+	var lockCursor 			= false;	// 	Generated objects appear at cursor position		->(LMB)<-	
 										// 	Newly generated objects:
 	var randomRotation 		= false;	// 	- Are randomly rotated
 	var randomInterval 		= false;	//	- Appear within random intervals
@@ -50,6 +50,25 @@ $(function() {
 	// End of default interaction variables
 	
 	/** Interaction menu and information functionality **/
+	
+	// FPS + Object Counter // https://www.growingwiththeweb.com/2017/12/fast-simple-js-fps-counter.html
+	const times = [];
+	let fps, objectCount;
+
+	function refreshLoop() {
+	  window.requestAnimationFrame(() => {
+		const now = performance.now();
+		while (times.length > 0 && times[0] <= now - 1000) {
+		  times.shift();
+		}
+		times.push(now);
+		fps = times.length;
+		objectCount = $('.fullrect').length;
+		refreshLoop();
+	  });
+	}
+
+	refreshLoop();
 	
 	if (!menu) {
 		$(".info").css('display', 'none');
@@ -100,6 +119,9 @@ $(function() {
 			$("#infoRandomLocation").text(randomLocation ? "ON" : "OFF");
 			$("#infoRandomColors").text(randomColors ? "ON" : "OFF");
 			$("#infoRandomEvery").text(randomEvery);
+			
+			$("#fps").text(fps);
+			$("#objectCount").text(objectCount);
 		}
 	}
 
@@ -233,16 +255,17 @@ $(function() {
 	// Initialize variables
 	var demoPresetJSON = '[{"menu":true,"fullStop":false,"currentColorMode":3,"lockCursor":true,"interval":0.2,"intervalMouseMode":false,"rotationMouseMode":false,"rotationValue":65,"animationTimer":7.5,"destructTimer":3000,"currentMouseX":50,"currentMouseY":50,"randomRotation":true,"randomInterval":false,"randomLocation":false,"randomColors":false,"randomEvery":1}]';
 	
-	var savedPresets = []; // array of saved presets
+	var savedPresets = loadDemoPresets ? JSON.parse(demoPresetJSON) : []; // array of saved presets
 	var selectedPresetNumber = 0; // store current preset number (not array positions!)
 	
 	// Initialize cookies, empty or saved
 	if (Cookies.get('savedPresets')) {
 		let parsed = JSON.parse(Cookies.get('savedPresets'));
 		savedPresets = 
-			(parsed.length === 0) ? JSON.parse(demoPresetJSON) : parsed;
-		updatePresetBoxes();
+			(parsed.length === 0 && loadDemoPresets) ? JSON.parse(demoPresetJSON) : parsed;
 	}
+	
+	updatePresetBoxes();
 	
 	// Save cookies
 	function savePresetCookies() {
@@ -374,10 +397,14 @@ $(function() {
 	$('.main').mousedown(function(event) {
 		switch (event.which) {
 			case 1: // lmb
+				lockCursor = !lockCursor;				// Follow cursor
 				break;
 			case 2: // mmb
+				rotationMouseMode = !rotationMouseMode;	// Mosue affects rotation
+				event.preventDefault();
 				break;
 			case 3: // rmb
+				intervalMouseMode = !intervalMouseMode;	// Mouse affects interval
 				break;
 			default:
 				console.log('8-)');

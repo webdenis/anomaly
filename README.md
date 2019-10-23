@@ -16,10 +16,11 @@ Objects:
 
 **WARNING: Long auto-destruct timer WILL negatively affect the performance!** 
 
-Default mouse interaction, moving mouse in:
-- X axis: affects **interval**.
-- Y axis: affects **rotation**.
-These can be disabled via menu options **Rotation MouseX** and **Interval Mouse Y**.
+Default mouse interactions; moving mouse in:
+- X axis: affects **interval**. This can be toggled by RMB.
+- Y axis: affects **rotation**.This can be toggled by MMB.
+These can also toggled via menu: **Rotation MouseX** and **Interval Mouse Y**.
+- Follow cursor: Objects are generated at mouse position. This can be toggled by LMB.
 
 Randomization:
 - Objects can be randomized by interval, color mode, rotation and position.
@@ -37,7 +38,6 @@ Menu:
 - Menu can be hidden via **menu** variable, shown and hidden using arrow key, shown via HOME (page) button.
 - Arrow keys: navigate the menu with **UP** and **DOWN**. Change boolean variables with **LEFT** and **RIGHT** arrow keys.
 - Full stop: Stops the object generation.
-- Follow cursor: Objects are generated at mouse position.
 
 ---
 
