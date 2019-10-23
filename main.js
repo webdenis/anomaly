@@ -120,7 +120,9 @@ $(function() {
 			$("#infoRandomColors").text(randomColors ? "ON" : "OFF");
 			$("#infoRandomEvery").text(randomEvery);
 			
-			$("#fps").text(fps);
+			let fpsH = $("#fps").addClass('red');
+			fpsH.text(fps);
+			if (fps < 30) { fpsH.addClass('red'); } else { fpsH.removeClass('red'); };
 			$("#objectCount").text(objectCount);
 		}
 	}
@@ -652,7 +654,7 @@ $(function() {
 		range: "min",
 		value: destructTimer,
 		min: 100,
-		max: 3000,
+		max: 7500,
 		slide: function( event, ui ) {
 			destructTimer = ui.value;
 		}

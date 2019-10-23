@@ -1,4 +1,6 @@
 # Anomaly
+![Anomaly Cover](https://raw.githubusercontent.com/webdenis/anomaly/master/img/cover.png)
+
 Anomaly is a web-app for visual object generation and interaction.
 
 Used stack: HTML, CSS3, Javascript - JQuery (+UI) - js-cookie
