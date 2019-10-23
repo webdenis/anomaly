@@ -17,18 +17,24 @@ Objects:
 **WARNING: Long auto-destruct timer WILL negatively affect the performance!** 
 
 Default mouse interaction, moving mouse in:
-- X axis: affects **interval**. This can be disabled by ticking the checkbox next to the interval slider.
-- Y axis: affects **rotation**. This can be disabled by ticking the checkbox next to the rotation slider.
+- X axis: affects **interval**.
+- Y axis: affects **rotation**.
+These can be disabled via menu options **Rotation MouseX** and **Interval Mouse Y**.
 
 Randomization:
 - Objects can be randomized by interval, color mode, rotation and position.
 - Randomization function is called after every **randomEvery** objects created. By default, **randomEvery = 1**.
 
+Presets:
+- Presets are stored in cookies. Default (demo) presets are loaded if **loadDemoPresets** is set to **true**. Variable **demoPresetJSON** needs to be populated with JSON formatted array of preset objects.
+- Current group of settings can be saved using **Add new preset**.
+- Selected preset can be removed using **Remove selected preset**.
+
 Menu: 
 - Menu can be hidden via **menu** variable, shown and hidden using arrow key, shown via HOME (page) button.
 - Arrow keys: navigate the menu with **UP** and **DOWN**. Change boolean variables with **LEFT** and **RIGHT** arrow keys.
 - Full stop: Stops the object generation.
-- Locking: Current object generation position, rotation and interval can be locked via menu.
+- Follow cursor: Objects are generated at mouse position.
 
 ---
 
