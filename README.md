@@ -19,6 +19,7 @@ Objects:
 Default mouse interactions; moving mouse in:
 - X axis: affects **interval**. This can be toggled by RMB.
 - Y axis: affects **rotation**.This can be toggled by MMB.
+
 These can also toggled via menu: **Rotation MouseX** and **Interval Mouse Y**.
 - Follow cursor: Objects are generated at mouse position. This can be toggled by LMB.
 
