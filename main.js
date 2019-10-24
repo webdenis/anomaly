@@ -319,7 +319,7 @@ $(function() {
 	/** Presets functionality **/
 		
 	// Initialize variables
-	var demoPresetJSON = '[{"menu":true,"fullStop":false,"currentColorMode":3,"lockCursor":true,"interval":0.2,"intervalMouseMode":false,"rotationMouseMode":false,"rotationValue":65,"animationTimer":7.5,"destructTimer":3000,"currentMouseX":50,"currentMouseY":50,"randomRotation":true,"randomInterval":false,"randomLocation":false,"randomColors":false,"randomEvery":1}]';
+	var demoPresetJSON = '[{"menu":true,"fullStop":false,"currentColorMode":3,"lockCursor":true,"interval":0.2,"intervalMouseMode":false,"rotationMouseMode":false,"rotationValue":65,"animationTimer":7.5,"destructTimer":3000,"currentMouseX":50,"currentMouseY":50,"randomRotation":true,"randomInterval":false,"randomLocation":false,"randomColors":false,"randomEvery":1},{"menu":true,"fullStop":false,"currentColorMode":3,"lockCursor":true,"interval":0.05,"intervalMouseMode":false,"rotationMouseMode":false,"rotationValue":10,"animationTimer":5.5,"destructTimer":4000,"currentMouseX":15,"currentMouseY":46,"randomRotation":false,"randomInterval":false,"randomLocation":false,"randomColors":false,"randomEvery":148}] ';
 	
 	var savedPresets = loadDemoPresets ? JSON.parse(demoPresetJSON) : []; // array of saved presets
 	var selectedPresetNumber = 0; // store current preset number (not array positions!)
@@ -731,7 +731,7 @@ $(function() {
 		range: "min",
 		value: randomEvery,
 		min: 1,
-		max: 50,
+		max: 250,
 		step: 1,
 		slide: function( event, ui ) {
 			randomEvery = ui.value;
