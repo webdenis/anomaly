@@ -13,6 +13,9 @@ $(function() {
 	
 	var fullStop			= false;	//	Stop objects from generating
 	
+	var stopOnLowFPS		= true;		//	Stops object generation
+	var minFps				= 10;		// 	if FPS drops below this vlaue
+	
 	var interval 			= 500; 		// 	Time between object generation
 	
 	var color 				= 0;		// 	Starting color
@@ -83,6 +86,7 @@ $(function() {
 		if (menu) { // only update if menu is visible
 			$("#infoShowMenu").text(menu ? "ON" : "OFF");
 			$("#infoStop").text(fullStop ? "ON" : "OFF");
+			$("#infoFpsStop").text(stopOnLowFPS ? "ON" : "OFF");
 			$("#infoColorMode").text(infoColorMode);
 			
 			$("#infoCursorPosition").text(!lockCursor ? "ON" : "OFF");
@@ -120,6 +124,10 @@ $(function() {
 			$("#infoRandomColors").text(randomColors ? "ON" : "OFF");
 			$("#infoRandomEvery").text(randomEvery);
 			
+			if ($("#randomEverySlider").hasClass('ui-slider')) {
+				$("#randomEverySlider").slider('value', randomEvery);
+			}
+			
 			let fpsH = $("#fps").addClass('red');
 			fpsH.text(fps);
 			if (fps < 30) { fpsH.addClass('red'); } else { fpsH.removeClass('red'); };
@@ -137,8 +145,25 @@ $(function() {
 	var firstInteraction 	= 1; // number of first interaction
 	var interactionMode 	= firstInteraction;	// current interaction mode
 	var lastInteraction 	= $('.info>div').length; // number of last interaction = number of interactions in menu
+	$(".info>div:eq("+(interactionMode - 1)+")").addClass('selected')
 	
-	$(".info>div:eq("+(interactionMode - 1)+")").addClass('selected'); // visually select current interaction
+	// Allow menu option selection with left click
+	$('.info>div').mousedown(function(e) {
+		if (e.which === 1) {
+			interactionMode = $('.info>div').index($(this)) + 1;
+			$(".info>div").removeClass('selected');
+			$(".info>div:eq("+(interactionMode - 1)+")").addClass('selected'); // visually select current interaction
+		}
+	});
+	
+	// Allow option value change with mousewheel
+	$('body').on('wheel', function(e) {
+		if (e.originalEvent.deltaY < 0) { // up
+			interactionValue('right');
+		} else { // down
+			interactionValue('left');
+		}
+	});
 	
 	// Arrow keys interactions
 	
@@ -179,10 +204,54 @@ $(function() {
 		return false;
 	});
 	
+	// Return change if x is correctly between a and b
+	function changeIfInBetween(x, a, b, change) {
+		if (change < 0) {
+			return (x > a && x <= b) ? change : 0;
+		} else {
+			return (x >= a && x < b) ? change : 0;
+		}
+	}
+	
 	// Change interaction value
 	function interactionValue(dir) {
 		let mode = $(".info>div:eq("+(interactionMode - 1)+")").attr('data');
 		
+		// Sliders
+		let sliderHandle = $(".info>div:eq("+(interactionMode - 1)+")").find('div.slider');
+		let containsSlider = sliderHandle.length !== 0;
+		
+		if (containsSlider) {
+			let change = (dir === 'right' ? 1 : -1) * sliderHandle.slider('option', 'step');
+			let sMin = sliderHandle.slider('option', 'min');
+			let sMax = sliderHandle.slider('option', 'max');
+			
+			switch(mode) {
+				case 'intInterval':
+					intervalValue += changeIfInBetween(intervalValue, sMin, sMax, change);
+					intervalInteractivity(intervalValue);
+					break;
+				case 'intRotationSpeed':
+					rotationValue += changeIfInBetween(rotationValue, sMin, sMax, change);
+					rotationInteractivity(rotationValue);
+					break;
+				case 'intAnimationSpeed':
+					animationTimer += changeIfInBetween(animationTimer, sMin, sMax, change);
+					break;	
+				case 'intAutodestruct':
+					destructTimer += changeIfInBetween(destructTimer, sMin, sMax, change);
+					break;
+				case 'intRandomEvery':
+					randomEvery += changeIfInBetween(randomEvery, sMin, sMax, change);
+					break;
+				default:
+					return;
+			}
+			
+			return;
+		}
+		
+		// Booleans
 		switch(mode) {
 			case 'intMenu':
 				menu = !menu;
@@ -197,6 +266,10 @@ $(function() {
 					mainLoop();
 				}
 				break;
+				
+			case 'intFpsStop':
+				stopOnLowFPS = !stopOnLowFPS;
+				break;
 			
 			case 'intFollowCursor':
 				lockCursor = !lockCursor;
@@ -204,9 +277,6 @@ $(function() {
 				
 			case 'intRotationMouseMode':
 				rotationMouseMode = !rotationMouseMode;
-				break;
-				
-			case 'intRotationSpeed':
 				break;
 				
 			case 'intColors':
@@ -222,13 +292,7 @@ $(function() {
 			case 'intIntervalMouseMode':
 				intervalMouseMode = !intervalMouseMode;
 				break;
-				
-			case 'intInterval':
-				break;
-				
-			case 'intAutodestruct':
-				break;
-				
+								
 			case 'intRandomRotation':
 				randomRotation = !randomRotation;
 				break;
@@ -414,7 +478,7 @@ $(function() {
 	});
 	
 	// Disable right click context menu
-	$('.main').on('contextmenu', function(event){
+	$('.main, .info').on('contextmenu', function(event){
         event.preventDefault();
     });
 	
@@ -620,6 +684,7 @@ $(function() {
 		value: interval,
 		min: 1,
 		max: 100,
+		step: 1,
 		slide: function( event, ui ) {
 			intervalInteractivity(ui.value);
 		}
@@ -631,7 +696,7 @@ $(function() {
 		value: rotation,
 		min: 1,
 		max: 100,
-		step: 0.1,
+		step: 1,
 		slide: function( event, ui ) {
 			rotationInteractivity(ui.value);
 		}
@@ -655,6 +720,7 @@ $(function() {
 		value: destructTimer,
 		min: 100,
 		max: 7500,
+		step: 100,
 		slide: function( event, ui ) {
 			destructTimer = ui.value;
 		}
@@ -666,6 +732,7 @@ $(function() {
 		value: randomEvery,
 		min: 1,
 		max: 50,
+		step: 1,
 		slide: function( event, ui ) {
 			randomEvery = ui.value;
 		}
@@ -729,6 +796,15 @@ $(function() {
 	setInterval(function() {
 		updateInfo();
 	}, 100);
+	
+	// Stop on low fps
+	setTimeout(function() {
+		setInterval(function() {
+			if (fps < minFps && stopOnLowFPS) {
+				fullStop = true;
+			}
+		}, 1000);
+	}, 2500);
 	
 	/** Main logic end **/
 	

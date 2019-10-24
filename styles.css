@@ -55,6 +55,7 @@ html, body, .main {
 	margin: 0px -7px 0px -7px;
 	padding: 1px 7px 1px 7px;
 	overflow: auto;
+	cursor: pointer;
 }
 
 .info > div.selected {
