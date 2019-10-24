@@ -2,7 +2,7 @@ $(function() {
 	
 	/**
 		@name Anomaly
-		@version 0.7
+		@version 0.8
 		@github https://github.com/webdenis/anomaly
 	**/
 	
@@ -83,6 +83,7 @@ $(function() {
 	var rotationValue = 0;
 		
 	function updateInfo() {
+		$(".fullStop").css('display', (fullStop ? 'block' : 'none'));
 		if (menu) { // only update if menu is visible
 			$("#infoShowMenu").text(menu ? "ON" : "OFF");
 			$("#infoStop").text(fullStop ? "ON" : "OFF");
@@ -193,15 +194,27 @@ $(function() {
 				break;
 				
 			case 36: // HOME - menu ON
-				menu = true;
-				$(".info").css('display', menu ? 'block' : 'none');
+				menu = !menu;
+				$(".info").toggle();
 				break;
+			
+			case 35: // END - toggle generation
+				fullStop = !fullStop;
+				if (!fullStop) {
+					mainLoop();
+				}
 				
 			default: return;
 		}
 		e.preventDefault();
 		e.stopPropagation();
 		return false;
+	});
+	
+	// Stop message click = start
+	$(".fullStop").click(function() {
+		fullStop = false;
+		mainLoop();
 	});
 	
 	// Return change if x is correctly between a and b
@@ -319,7 +332,7 @@ $(function() {
 	/** Presets functionality **/
 		
 	// Initialize variables
-	var demoPresetJSON = '[{"menu":true,"fullStop":false,"currentColorMode":3,"lockCursor":true,"interval":0.2,"intervalMouseMode":false,"rotationMouseMode":false,"rotationValue":65,"animationTimer":7.5,"destructTimer":3000,"currentMouseX":50,"currentMouseY":50,"randomRotation":true,"randomInterval":false,"randomLocation":false,"randomColors":false,"randomEvery":1},{"menu":true,"fullStop":false,"currentColorMode":3,"lockCursor":true,"interval":0.05,"intervalMouseMode":false,"rotationMouseMode":false,"rotationValue":10,"animationTimer":5.5,"destructTimer":4000,"currentMouseX":15,"currentMouseY":46,"randomRotation":false,"randomInterval":false,"randomLocation":false,"randomColors":false,"randomEvery":148}] ';
+	var demoPresetJSON = '[{"menu":true,"fullStop":false,"currentColorMode":3,"lockCursor":true,"interval":0.2,"intervalMouseMode":false,"rotationMouseMode":false,"rotationValue":65,"animationTimer":7.5,"destructTimer":3000,"currentMouseX":50,"currentMouseY":50,"randomRotation":true,"randomInterval":false,"randomLocation":false,"randomColors":false,"randomEvery":1},{"menu":true,"fullStop":false,"currentColorMode":3,"lockCursor":true,"interval":0.05,"intervalMouseMode":false,"rotationMouseMode":false,"rotationValue":10,"animationTimer":5.5,"destructTimer":4000,"currentMouseX":15,"currentMouseY":46,"randomRotation":false,"randomInterval":false,"randomLocation":false,"randomColors":false,"randomEvery":1},{"menu":true,"fullStop":false,"currentColorMode":3,"lockCursor":true,"interval":6.050000000000001,"intervalMouseMode":false,"rotationMouseMode":false,"rotationValue":71,"animationTimer":5.5,"destructTimer":4000,"currentMouseX":97,"currentMouseY":29,"randomRotation":true,"randomInterval":false,"randomLocation":true,"randomColors":true,"randomEvery":200}]';
 	
 	var savedPresets = loadDemoPresets ? JSON.parse(demoPresetJSON) : []; // array of saved presets
 	var selectedPresetNumber = 0; // store current preset number (not array positions!)

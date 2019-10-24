@@ -4,6 +4,7 @@ html, body, .main {
 	overflow: hidden;
 	width: 100%;
 	height: 100%;
+	background-color: black;
 }
 
 .main .fullrect {
@@ -11,7 +12,6 @@ html, body, .main {
 	height: 0%;
 	background-color: black;
 	position: absolute;
-	/*transition: all 1s ease-in-out;*/
 }
 
 @-webkit-keyframes rotatingRight {
@@ -95,29 +95,10 @@ html, body, .main {
 
 .slider {
 	opacity: 0.75;
-}
-
-.twoCol {
 	margin-left: 1px;
 	margin-right: 2px;
 	margin-top: 4px; 
 	margin-bottom: 2px;
-}
-
-.colOne {
-	margin-left: 1px;
-	margin-top: 4px;
-	width: 80%; float: left;
-	margin-bottom: 4px;
-}
-
-.colTwo {
-	width: 10%; float: right;
-	margin-right: 5px;
-}
-
-.colTwo input {
-	opacity: 0.75;
 }
 
 .fps {
@@ -127,4 +108,14 @@ html, body, .main {
 
 .red {
 	color: red;
+}
+
+.fullStop {
+	cursor: pointer;
+	display: none;
+	color: white;
+	font-size: 20pt;
+	position: absolute;
+	top: 5%;
+	left: 5%;
 }

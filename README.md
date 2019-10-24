@@ -5,7 +5,7 @@ Anomaly is a web-app for visual object generation and interaction.
 
 Used stack: HTML, CSS3, Javascript - JQuery (+UI) - js-cookie
 
-Demo: https://webdenis.github.io/anomaly/
+Demo version 0.8: https://webdenis.github.io/anomaly/
 
 ## Functionality
 Objects:
@@ -26,10 +26,10 @@ Default mouse interactions; moving mouse in:
 These can also be toggled via menu options: **Follow cursor**, **Interval Mouse Y** and **Rotation MouseX**.
 
 Menu: 
-- If hidden, menu can be shown via HOME PAGE button.
+- can be toggled by HOME PAGE button.
 - Navigate the menu with **UP** and **DOWN** arrowkeys or by left clicking the options. The current active option will be selected.
 - Once option is selected, change values with **LEFT** or **RIGHT** arrow keys or by **Mouse Wheel scroll**.
-- Full stop: Stops the object generation.
+- Full stop: Stops the object generation, can be toggled via END PAGE button.
 - Stop on low FPS: Turns Full stop ON if FPS is detected to be lower than **minFps**, *default = 10*.
 - Full list of options: Show menu, Stop, Stop on low FPS, Colors, Follow cursor, Interval Mouse Y, Interval, Rotation Mouse X, Rotation, Animation speed, Auto-destruct, Random rotation / interval / location / color, Randomize every N, Presets.
 
@@ -40,7 +40,11 @@ Randomization:
 Presets:
 - Presets are stored in cookies. Default (demo) presets are loaded if **loadDemoPresets** is set to **true**. Variable **demoPresetJSON** needs to be populated with JSON formatted array of preset objects.
 ```
-	var demoPresetJSON = '[{"menu":true,"fullStop":false,"currentColorMode":3,"lockCursor":true,"interval":0.2,"intervalMouseMode":false,"rotationMouseMode":false,"rotationValue":65,"animationTimer":7.5,"destructTimer":3000,"currentMouseX":50,"currentMouseY":50,"randomRotation":true,"randomInterval":false,"randomLocation":false,"randomColors":false,"randomEvery":1}]';
+ar demoPresetJSON = '[
+		{"menu":true,"fullStop":false,"currentColorMode":3,"lockCursor":true,"interval":0.2,"intervalMouseMode":false,"rotationMouseMode":false,"rotationValue":65,"animationTimer":7.5,"destructTimer":3000,"currentMouseX":50,"currentMouseY":50,"randomRotation":true,"randomInterval":false,"randomLocation":false,"randomColors":false,"randomEvery":1},
+		{"menu":true,"fullStop":false,"currentColorMode":3,"lockCursor":true,"interval":0.05,"intervalMouseMode":false,"rotationMouseMode":false,"rotationValue":10,"animationTimer":5.5,"destructTimer":4000,"currentMouseX":15,"currentMouseY":46,"randomRotation":false,"randomInterval":false,"randomLocation":false,"randomColors":false,"randomEvery":1},
+		{"menu":true,"fullStop":false,"currentColorMode":3,"lockCursor":true,"interval":6.05,"intervalMouseMode":false,"rotationMouseMode":false,"rotationValue":71,"animationTimer":5.5,"destructTimer":4000,"currentMouseX":97,"currentMouseY":29,"randomRotation":true,"randomInterval":false,"randomLocation":true,"randomColors":true,"randomEvery":200}
+		     ]';
 ```
 - Current group of options can be saved using **Add new preset**.
 - Selected preset can be removed using **Remove selected preset**.
