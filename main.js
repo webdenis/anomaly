@@ -2,7 +2,7 @@ $(function() {
 	
 	/**
 		@name Anomaly
-		@version 0.8
+		@version 0.9
 		@github https://github.com/webdenis/anomaly
 	**/
 	
@@ -29,7 +29,16 @@ $(function() {
 	var firstColor 			= 1; 		//	Number of first
 	var lastColor 			= 4;		//	and last color	
 	
-	var rotation 			= 'none';	// 	Generated CSS string for object rotation
+	var transform			= 'none';	// 	Generated CSS string for object transform
+	
+	var transformMode		= 1;		/*	Current transform mode
+											1 - Rotation
+											2 - Skew X
+											3 - Skew Y
+											4 - Skew XY							*/
+										
+	var firstTransformMode	= 1;		// Number of first
+	var lastTransformMode	= 4;		// and last transform mode
 	
 	var animationTimer		= 1;		// 	Animation time in seconds
 	
@@ -39,16 +48,39 @@ $(function() {
 	var currentMouseY 		= 50;		//				  Y
 	
 	var intervalMouseMode 	= true;  	// 	Mouse affecting interval in Y scale 			->(RMB)<-
-	var rotationMouseMode	= true;		//	Mouse affecting rotation in X scale				->(MMB)<-
+	var transformMouseMode	= true;		//	Mouse affecting transform in X scale			->(MMB)<-
 	
 	var lockCursor 			= false;	// 	Generated objects appear at cursor position		->(LMB)<-	
 										// 	Newly generated objects:
-	var randomRotation 		= false;	// 	- Are randomly rotated
+	var randomTransform		= false;	// 	- Random transformation mode
+	var randomTransformVars	= false;	//	- Random transformation direction / speed
 	var randomInterval 		= false;	//	- Appear within random intervals
 	var randomLocation 		= false;	//	- Appear in random position
 	var randomColors 		= false;	//	- Use random color mode
+	var randomAnimSpeed		= false;	// 	- Use random css animation speed
+	var randomDestructTimer = false; 	// 	- Auto-destruct after random time
 	
 	var randomEvery 		= 1;		//	How many objects are generated between randomizations
+	
+	/** Min & Max **/	
+	var animSpeedMinValue	= 0.5;
+	var animSpeedMaxValue	= 7.5;
+	var animSpeedStep		= 0.5;
+	
+	var destructMinValue	= 100;
+	var destructMaxValue	= 7500;
+	var destructStep		= 100;
+	
+	var randomEveryMinValue = 1;
+	var randomEveryMaxValue = 250;
+	var randomEveryStep		= 1;
+	
+	// Random min max
+	var randomIntervalMin	= 0;		// Minimum and 
+	var randomIntervalMax	= 75;		// maximum values of random interval in %
+	
+	var randomDestructMin	= 100;
+	var randomDestructMax	= 3000;		// limit random destruct for performance
 
 	// End of default interaction variables
 	
@@ -77,34 +109,42 @@ $(function() {
 		$(".info").css('display', 'none');
 	}
 		
-	var infoRotation = 'none';
-	var infoColorMode = 'grays';
+	var infoTransform = 'none';
+	var infoTransformMode;
+	var infoColorMode;
 	var intervalValue = 0;
-	var rotationValue = 0;
+	var transformValue = 50;
+	
+	function ONorOFF(val) {
+		let x = val ? 'ON' : 'OFF';
+		return '<span class="'+x+'">'+x+'</span>';
+	}
 		
 	function updateInfo() {
 		$(".fullStop").css('display', (fullStop ? 'block' : 'none'));
 		if (menu) { // only update if menu is visible
-			$("#infoShowMenu").text(menu ? "ON" : "OFF");
-			$("#infoStop").text(fullStop ? "ON" : "OFF");
-			$("#infoFpsStop").text(stopOnLowFPS ? "ON" : "OFF");
+			$("#infoShowMenu").html(ONorOFF(menu));
+			$("#infoStop").html(ONorOFF(fullStop));
+			$("#infoFpsStop").html(ONorOFF(stopOnLowFPS));
 			$("#infoColorMode").text(infoColorMode);
 			
-			$("#infoCursorPosition").text(!lockCursor ? "ON" : "OFF");
+			$("#infoCursorPosition").html(ONorOFF(!lockCursor));
 			$("#infoPosition").text('X '+currentMouseX+'%, Y '+currentMouseY+'%');
 			
-			$("#infoIntervalMouseMode").text(intervalMouseMode ? "ON" : "OFF");
+			$("#infoIntervalMouseMode").html(ONorOFF(intervalMouseMode));
 			$("#infoInterval").text(interval.toFixed(0) + 'ms');
 			
 			if ($("#intervalSlider").hasClass('ui-slider')) {
 				$("#intervalSlider").slider('value', intervalValue);
 			}
 			
-			$("#infoRotationMouseMode").text(rotationMouseMode ? "ON" : "OFF");
-			$("#infoRotation").text(infoRotation);
+			$("#infoTransformMouseMode").html(ONorOFF(transformMouseMode));
+			transformInteractivity(transformValue);
+			$("#infoTransformMode").text(infoTransformMode);
+			$("#infoTransformVars").text(infoTransform);
 			
-			if ($("#rotationSlider").hasClass('ui-slider')) {
-				$("#rotationSlider").slider('value', rotationValue);
+			if ($("#transformSlider").hasClass('ui-slider')) {
+				$("#transformSlider").slider('value', transformValue);
 			}
 			
 			$("#infoAnimationSpeed").text(animationTimer);
@@ -119,11 +159,14 @@ $(function() {
 				$("#destructSlider").slider('value', destructTimer);
 			}
 			
-			$("#infoRandomRotation").text(randomRotation ? "ON" : "OFF");
-			$("#infoRandomInterval").text(randomInterval ? "ON" : "OFF");
-			$("#infoRandomLocation").text(randomLocation ? "ON" : "OFF");
-			$("#infoRandomColors").text(randomColors ? "ON" : "OFF");
-			$("#infoRandomEvery").text(randomEvery);
+			$("#infoRandomTransform").html(ONorOFF(randomTransform));
+			$("#infoRandomTransformVars").html(ONorOFF(randomTransformVars));
+			$("#infoRandomInterval").html(ONorOFF(randomInterval));
+			$("#infoRandomLocation").html(ONorOFF(randomLocation));
+			$("#infoRandomColors").html(ONorOFF(randomColors));
+			$("#infoRandomAnimationSpeed").html(ONorOFF(randomAnimSpeed));
+			$("#infoRandomDestructTimer").html(ONorOFF(randomDestructTimer));
+			$("#infoRandomEvery").text(randomEvery + ' ('+randomEveryCounter+') ');
 			
 			if ($("#randomEverySlider").hasClass('ui-slider')) {
 				$("#randomEverySlider").slider('value', randomEvery);
@@ -244,9 +287,9 @@ $(function() {
 					intervalValue += changeIfInBetween(intervalValue, sMin, sMax, change);
 					intervalInteractivity(intervalValue);
 					break;
-				case 'intRotationSpeed':
-					rotationValue += changeIfInBetween(rotationValue, sMin, sMax, change);
-					rotationInteractivity(rotationValue);
+				case 'intTransformVars':
+					transformValue += changeIfInBetween(transformValue, sMin, sMax, change);
+					transformInteractivity(transformValue);
 					break;
 				case 'intAnimationSpeed':
 					animationTimer += changeIfInBetween(animationTimer, sMin, sMax, change);
@@ -288,8 +331,19 @@ $(function() {
 				lockCursor = !lockCursor;
 				break;
 				
-			case 'intRotationMouseMode':
-				rotationMouseMode = !rotationMouseMode;
+			case 'intTransformMouseMode':
+				transformMouseMode = !transformMouseMode;
+				break;
+				
+			case 'intTransformMode':
+				if (dir === 'left') {
+					transformMode--;
+					if (transformMode === (firstTransformMode - 1)) { transformMode = lastTransformMode; }
+				} else {
+					transformMode++;
+					if (transformMode === (lastTransformMode + 1)) { transformMode = firstTransformMode; }
+				}
+				transformInteractivity(transformValue);
 				break;
 				
 			case 'intColors':
@@ -300,14 +354,19 @@ $(function() {
 					currentColorMode++;
 					if (currentColorMode === (lastColor + 1)) { currentColorMode = firstColor; }
 				}
+				getCurrentColor();
 				break;
 				
 			case 'intIntervalMouseMode':
 				intervalMouseMode = !intervalMouseMode;
 				break;
 								
-			case 'intRandomRotation':
-				randomRotation = !randomRotation;
+			case 'intRandomTransform':
+				randomTransform = !randomTransform;
+				break;
+				
+			case 'intRandomTransformVars':
+				randomTransformVars = !randomTransformVars;
 				break;
 				
 			case 'intRandomInterval':
@@ -321,10 +380,18 @@ $(function() {
 			case 'intRandomColors':
 				randomColors = !randomColors;
 				break;
+				
+			case 'intRandomAnimationSpeed':
+				randomAnimSpeed = !randomAnimSpeed;
+				break;
+				
+			case 'intRandomDestructTimer':
+				randomDestructTimer = !randomDestructTimer;
+				break;
 			
 			default: return;
 		}
-		
+
 	}
 	
 	// End of interaction menu and information functionality
@@ -332,7 +399,7 @@ $(function() {
 	/** Presets functionality **/
 		
 	// Initialize variables
-	var demoPresetJSON = '[{"menu":true,"fullStop":false,"currentColorMode":3,"lockCursor":true,"interval":0.2,"intervalMouseMode":false,"rotationMouseMode":false,"rotationValue":65,"animationTimer":7.5,"destructTimer":3000,"currentMouseX":50,"currentMouseY":50,"randomRotation":true,"randomInterval":false,"randomLocation":false,"randomColors":false,"randomEvery":1},{"menu":true,"fullStop":false,"currentColorMode":3,"lockCursor":true,"interval":0.05,"intervalMouseMode":false,"rotationMouseMode":false,"rotationValue":10,"animationTimer":5.5,"destructTimer":4000,"currentMouseX":15,"currentMouseY":46,"randomRotation":false,"randomInterval":false,"randomLocation":false,"randomColors":false,"randomEvery":1},{"menu":true,"fullStop":false,"currentColorMode":3,"lockCursor":true,"interval":6.050000000000001,"intervalMouseMode":false,"rotationMouseMode":false,"rotationValue":71,"animationTimer":5.5,"destructTimer":4000,"currentMouseX":97,"currentMouseY":29,"randomRotation":true,"randomInterval":false,"randomLocation":true,"randomColors":true,"randomEvery":200}]';
+	var demoPresetJSON = '[{"menu":true,"fullStop":false,"currentColorMode":3,"lockCursor":true,"interval":273.8,"intervalMouseMode":false,"transformMouseMode":false,"transformMode":1,"transformValue":5,"animationTimer":7.5,"destructTimer":2300,"currentMouseX":50,"currentMouseY":48,"randomTransform":false,"randomTransformVars":false,"randomInterval":true,"randomLocation":false,"randomColors":true,"randomAnimSpeed":false,"randomDestructTimer":false,"randomEvery":10},{"menu":true,"fullStop":false,"currentColorMode":3,"lockCursor":false,"interval":4.802000000000001,"intervalMouseMode":false,"transformMouseMode":false,"transformMode":1,"transformValue":10,"animationTimer":4,"destructTimer":2500,"currentMouseX":92,"currentMouseY":95,"randomTransform":false,"randomTransformVars":false,"randomInterval":false,"randomLocation":false,"randomColors":false,"randomAnimSpeed":false,"randomDestructTimer":false,"randomEvery":1}]';
 	
 	var savedPresets = loadDemoPresets ? JSON.parse(demoPresetJSON) : []; // array of saved presets
 	var selectedPresetNumber = 0; // store current preset number (not array positions!)
@@ -374,8 +441,9 @@ $(function() {
 			'interval' : interval,
 			'intervalMouseMode' : intervalMouseMode,
 
-			'rotationMouseMode' : rotationMouseMode,
-			'rotationValue' : rotationValue,
+			'transformMouseMode' : transformMouseMode,
+			'transformMode' : transformMode,
+			'transformValue' : transformValue,
 			
 			'animationTimer' : animationTimer,
 			'destructTimer' : destructTimer,
@@ -383,10 +451,13 @@ $(function() {
 			'currentMouseX' : currentMouseX,
 			'currentMouseY' : currentMouseY,
 			
-			'randomRotation' : randomRotation,
+			'randomTransform' : randomTransform,
+			'randomTransformVars' : randomTransformVars,
 			'randomInterval' : randomInterval,
 			'randomLocation' : randomLocation,
 			'randomColors' : randomColors,
+			'randomAnimSpeed' : randomAnimSpeed,
+			'randomDestructTimer' : randomDestructTimer,
 			'randomEvery' : randomEvery
 		};
 	}
@@ -401,8 +472,9 @@ $(function() {
 		intervalMouseMode = preset['intervalMouseMode'];
 		intervalInteractivity(preset['interval']); // sets interval & intervalValue
 		 
-		rotationMouseMode = preset['rotationMouseMode'];
-		rotationInteractivity(preset['rotationValue']); // sets rotation & rotationValue
+		transformMouseMode = preset['transformMouseMode'];
+		transformMode = preset['transformMode'];
+		transformInteractivity(preset['transformValue']); // sets transform & transfromValue
 			 
 		animationTimer = preset['animationTimer'];
 		destructTimer = preset['destructTimer'];
@@ -410,10 +482,13 @@ $(function() {
 		currentMouseX = preset['currentMouseX'];
 		currentMouseY = preset['currentMouseY'];
 			   
-		randomRotation = preset['randomRotation'];
+		randomTransform = preset['randomTransform'];
+		randomTransformVars = preset['randomTransformVars'];
 		randomInterval = preset['randomInterval'];
 		randomLocation = preset['randomLocation'];
 		randomColors = preset['randomColors'];
+		randomAnimSpeed = preset['randomAnimSpeed'];
+		randomDestructTimer = preset['randomDestructTimer'];
 		randomEvery = preset['randomEvery'];
 	}
 		
@@ -476,14 +551,14 @@ $(function() {
 	$('.main').mousedown(function(event) {
 		switch (event.which) {
 			case 1: // lmb
-				lockCursor = !lockCursor;				// Follow cursor
+				lockCursor = !lockCursor;					// Follow cursor
 				break;
 			case 2: // mmb
-				rotationMouseMode = !rotationMouseMode;	// Mosue affects rotation
+				transformMouseMode = !transformMouseMode;	// Mouse affects transform
 				event.preventDefault();
 				break;
 			case 3: // rmb
-				intervalMouseMode = !intervalMouseMode;	// Mouse affects interval
+				intervalMouseMode = !intervalMouseMode;		// Mouse affects interval
 				break;
 			default:
 				console.log('8-)');
@@ -516,11 +591,10 @@ $(function() {
 		yMousemove(yPercent);
 	});
 	
-	/** Todo: functionality to bind functions to X-Y axis functions instead of hardcoding them here **/
 	// Mouse move function left-right
 	function xMousemove(val) {
-		if (rotationMouseMode)
-			rotationInteractivity(val);
+		if (transformMouseMode)
+			transformInteractivity(val);
 	}
 	
 	// Mouse move function up-down
@@ -529,7 +603,7 @@ $(function() {
 			intervalInteractivity(val);		
 	}
 	
-	/** Interval and Rotation formulas and interaction functions **/
+	/** Interval and Transform formulas and interaction functions **/
 	
 	// Interval formula function
 	function intervalFormula(val) {
@@ -542,8 +616,8 @@ $(function() {
 		interval = intervalFormula(val);
 	}
 	
-	// Rotation formula function
-	function rotationFormula(val) {
+	// Transform speed formula function
+	function transformFormula(val) {
 		let speed;
 		if (val < 49) {
 			speed = 0.1 + 0.00023 * Math.pow(val, 3.32);
@@ -554,22 +628,40 @@ $(function() {
 		return speed;
 	}
 	
-	// Rotation interactivity function
-	function rotationInteractivity(val) {
-		rotationValue = val;
+	// Transform interactivity function
+	function transformInteractivity(val) {
+		
+		switch(transformMode) {
+			case 1:
+				infoTransformMode = 'rotate';
+				break;
+			case 2:
+				infoTransformMode = 'skewX';
+				break;
+			case 3:
+				infoTransformMode = 'skewY';
+				break;
+			case 4:
+				infoTransformMode = 'skewXY';
+				break;
+			default:
+				infoTransformMode = 'rotate';
+		}
+		
+		transformValue = val;
 		let speed;
 		if (val < 49) {
-			speed = rotationFormula(val);
-			rotation = 'rotatingLeft '+speed.toFixed(1)+'s linear infinite';
-			infoRotation = 'left ' + speed.toFixed(1) + 's';
+			speed = transformFormula(val);
+			transform = infoTransformMode+'Left '+speed.toFixed(1)+'s linear infinite';
+			infoTransform = 'left ' + speed.toFixed(1) + 's';
 
 		} else if (val > 51) {
-			speed = rotationFormula(val);
-			rotation = 'rotatingRight '+speed.toFixed(1)+'s linear infinite';
-			infoRotation = 'right ' + speed.toFixed(1) + 's';
+			speed = transformFormula(val);
+			transform = infoTransformMode+'Right '+speed.toFixed(1)+'s linear infinite';
+			infoTransform = 'right ' + speed.toFixed(1) + 's';
 		} else {
-			rotation = 'none';
-			infoRotation = 'none';
+			transform = 'none';
+			infoTransform = 'N/A';
 		}
 	}
 	
@@ -588,13 +680,18 @@ $(function() {
 		
 		let x;
 		
-		if (randomRotation) {
+		if (randomTransform) { // random transform mode
+			transformMode = Math.floor(Math.random() * lastTransformMode) + firstTransformMode;
+			transformInteractivity(transformValue);
+		}
+		
+		if (randomTransformVars) {
 			x = Math.floor(Math.random() * 100);
-			rotationInteractivity(x);
+			transformInteractivity(x);
 		}
 		
 		if (randomInterval) {
-			x = Math.floor(Math.random() * 10);
+			x = Math.floor(Math.random() * randomIntervalMax) + randomIntervalMin;
 			intervalInteractivity(x);
 		}
 		
@@ -606,7 +703,23 @@ $(function() {
 		if (randomColors) {
 			currentColorMode = Math.floor(Math.random() * lastColor) + firstColor;
 		}
+		
+		if (randomAnimSpeed) {
+			animationTimer = Math.random() * animSpeedMaxValue + animSpeedMinValue;
+			animationTimer = animationTimer.toFixed(1);
+		}
+		
+		if (randomDestructTimer) {
+			destructTimer = Math.floor(Math.random() * randomDestructMax) + randomDestructMin;
+		}
+		
 	}
+	
+	$('.toggleRandom').click(function() {
+		let bool = $(this).text() === 'ON' ? true : false;
+		randomColors = randomTransform = randomTransformVars = randomInterval = 
+			randomLocation = randomAnimSpeed = randomDestructTimer = bool;
+	});
 		
 	/** Color functionality **/
 	
@@ -703,15 +816,15 @@ $(function() {
 		}
     });
 
-	// Rotation slider
-	$( "#rotationSlider" ).slider({
+	// Transform slider
+	$( "#transformSlider" ).slider({
 		range: "min",
-		value: rotation,
+		value: transformValue,
 		min: 1,
 		max: 100,
 		step: 1,
 		slide: function( event, ui ) {
-			rotationInteractivity(ui.value);
+			transformInteractivity(ui.value);
 		}
     });
 	
@@ -719,9 +832,9 @@ $(function() {
 	$( "#animationSlider" ).slider({
 		range: "min",
 		value: animationTimer,
-		min: 0.5,
-		max: 7.5,
-		step: 0.5,
+		min: animSpeedMinValue,
+		max: animSpeedMaxValue,
+		step: animSpeedStep,
 		slide: function( event, ui ) {
 			animationTimer = ui.value;
 		}
@@ -731,9 +844,9 @@ $(function() {
 	$( "#destructSlider" ).slider({
 		range: "min",
 		value: destructTimer,
-		min: 100,
-		max: 7500,
-		step: 100,
+		min: destructMinValue,
+		max: destructMaxValue,
+		step: destructStep,
 		slide: function( event, ui ) {
 			destructTimer = ui.value;
 		}
@@ -743,9 +856,9 @@ $(function() {
 	$( "#randomEverySlider" ).slider({
 		range: "min",
 		value: randomEvery,
-		min: 1,
-		max: 250,
-		step: 1,
+		min: randomEveryMinValue,
+		max: randomEveryMaxValue,
+		step: randomEveryStep,
 		slide: function( event, ui ) {
 			randomEvery = ui.value;
 		}
@@ -772,7 +885,7 @@ $(function() {
 		// Create a new object
 		$('<div />', {"class": cns})									// clone classes				
 			.css({'background' : objColor})								// color
-			.css('-webkit-animation', rotation)							// rotation
+			.css('-webkit-animation', transform)						// transform
 			.css({left: currentMouseX+'%', top: currentMouseY+'%'})		// position
 			.css('transition', 'all '+animationTimer+'s ease-in-out')	// animation speed
 			.appendTo('.main');										

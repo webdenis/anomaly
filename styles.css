@@ -14,33 +14,15 @@ html, body, .main {
 	position: absolute;
 }
 
-@-webkit-keyframes rotatingRight {
-    from{
-        -webkit-transform: rotate(0deg);
-    }
-    to{
-        -webkit-transform: rotate(360deg);
-    }
-}
-
-@-webkit-keyframes rotatingLeft {
-    from{
-        -webkit-transform: rotate(360deg);
-    }
-    to{
-        -webkit-transform: rotate(0deg);
-    }
-}
-
 .info {
-	font-family: Helvetica;
+	font-family: Verdana;
 	padding: 7px 7px;
-	width: 111px;
+	width: 130px;
 	font-size: 7pt;
 	color: white;
 	background-color: rgba(0,0,0,0.65);
 	border-radius: 5px;
-	border: 1px solid #ccc;
+	border: 1px solid #939393;
 	position: absolute;
 	right: 1%;
 	bottom: 1%;
@@ -58,17 +40,60 @@ html, body, .main {
 	cursor: pointer;
 }
 
+.info h3 {
+	margin: 0px 0 5px 0;
+	text-align: center;
+}
+
+.info h4 {
+	margin: 4px 0 2px 0;
+	text-align: center;
+}
+
 .info > div.selected {
-	background-color: rgba(200,200,200, 0.75);
+	background-color: rgba(200,200,200, 0.65);
 	color: black;
+}
+
+.info > div span {
+	font-weight: bold;
+	float: right;
 }
 
 .info a {
 	color: white;
 }
 
+.info a:hover {
+	opacity: 0.8;
+}
+
 .info hr {
-	margin: 1px;
+	margin: 5px 0 0 0;
+	height: 1px;
+	border: 0;
+	background-color: #939393;
+}
+
+.info .ON, .info .OFF {
+	
+	font-weight: bold;
+}
+
+.info .ON {
+	color: #2ecc71;
+}
+
+.info .OFF {
+	color: #e74c3c;
+}
+
+.info .selected .ON {
+	color: #145a32;
+}
+
+.info .selected .OFF {
+	color: #641e16;
 }
 
 #presetBoxes span {
@@ -77,7 +102,7 @@ html, body, .main {
 	width: auto;
 	height: 8px;
 	margin: 1px;
-	padding: 2px 3px;
+	padding: 1px 2px 4px 2px;
 	color: black;
 	font-weight: bold;
 	text-align: center;
@@ -87,6 +112,10 @@ html, body, .main {
 
 #presetBoxes span:hover, #presetBoxes span.selected {
 	background-color: rgba(255,255,255, 0.75);
+}
+
+.centered {
+	text-align: center;
 }
 
 .removePreset.disabled {
@@ -106,7 +135,11 @@ html, body, .main {
 	text-align: center;
 }
 
-.red {
+.fps span {
+	font-weight: bold;
+}
+
+.fps .red {
 	color: red;
 }
 
@@ -118,4 +151,86 @@ html, body, .main {
 	position: absolute;
 	top: 5%;
 	left: 5%;
+}
+
+/** Transforms **/
+
+/** Rotation **/
+
+@-webkit-keyframes rotateRight {
+    from{
+        -webkit-transform: rotate(0deg);
+    }
+    to{
+        -webkit-transform: rotate(360deg);
+    }
+}
+
+@-webkit-keyframes rotateLeft {
+    from{
+        -webkit-transform: rotate(360deg);
+    }
+    to{
+        -webkit-transform: rotate(0deg);
+    }
+}
+
+/** Skew X **/
+
+@-webkit-keyframes skewXRight {
+    from{
+        -webkit-transform: skewX(0deg);
+    }
+    to{
+        -webkit-transform: skewX(360deg);
+    }
+}
+
+@-webkit-keyframes skewXLeft {
+    from{
+        -webkit-transform: skewX(360deg);
+    }
+    to{
+        -webkit-transform: skewX(0deg);
+    }
+}
+
+/** Skew Y **/
+
+@-webkit-keyframes skewYRight {
+    from{
+        -webkit-transform: skewY(0deg);
+    }
+    to{
+        -webkit-transform: skewY(360deg);
+    }
+}
+
+@-webkit-keyframes skewYLeft {
+    from{
+        -webkit-transform: skewY(360deg);
+    }
+    to{
+        -webkit-transform: skewY(0deg);
+    }
+}
+
+/** Skew XY **/
+
+@-webkit-keyframes skewXYRight {
+    from{
+        -webkit-transform: skew(0deg, 0deg);
+    }
+    to{
+        -webkit-transform: skew(360deg, 360deg);
+    }
+}
+
+@-webkit-keyframes skewXYLeft {
+    from{
+        -webkit-transform: skew(360deg, 360deg);
+    }
+    to{
+        -webkit-transform: skew(0deg, 0deg);
+    }
 }
